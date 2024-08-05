@@ -1,25 +1,29 @@
 from rest_framework import viewsets
 
-from core.models import Airplane
-from core.models import AirplaneType
-from core.models import Airport
-from core.models import City
-from core.models import Country
-from core.models import Crew
-from core.models import Flight
-from core.models import Order
-from core.models import Route
-from core.models import Ticket
-from core.serializers import AirplaneSerializer
-from core.serializers import AirplaneTypeSerializer
-from core.serializers import AirportSerializer
-from core.serializers import CitySerializer
-from core.serializers import CountrySerializer
-from core.serializers import CrewSerializer
-from core.serializers import FlightSerializer
-from core.serializers import OrderSerializer
-from core.serializers import RouteSerializer
-from core.serializers import TicketSerializer
+from core.models import (
+    Airplane,
+    AirplaneType,
+    Airport,
+    City,
+    Country,
+    Crew,
+    Flight,
+    Order,
+    Route,
+    Ticket,
+)
+from core.serializers import (
+    AirplaneSerializer,
+    AirplaneTypeSerializer,
+    AirportSerializer,
+    CitySerializer,
+    CountrySerializer,
+    CrewSerializer,
+    FlightSerializer,
+    OrderSerializer,
+    RouteSerializer,
+    TicketSerializer,
+)
 
 
 class CountryViewSet(viewsets.ModelViewSet):

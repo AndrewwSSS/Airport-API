@@ -1,17 +1,18 @@
-from django.urls import include
-from django.urls import path
+from django.urls import include, path
 from rest_framework import routers
 
-from core.views import AirplaneTypesViewSet
-from core.views import AirplaneViewSet
-from core.views import AirportViewSet
-from core.views import CityViewSet
-from core.views import CountryViewSet
-from core.views import CrewViewSet
-from core.views import FlightViewSet
-from core.views import OrderViewSet
-from core.views import RouteViewSet
-from core.views import TicketViewSet
+from core.views import (
+    AirplaneTypesViewSet,
+    AirplaneViewSet,
+    AirportViewSet,
+    CityViewSet,
+    CountryViewSet,
+    CrewViewSet,
+    FlightViewSet,
+    OrderViewSet,
+    RouteViewSet,
+    TicketViewSet,
+)
 
 router = routers.DefaultRouter()
 router.register("countries", CountryViewSet)

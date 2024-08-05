@@ -1,16 +1,18 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from core.models import Airplane
-from core.models import AirplaneType
-from core.models import Airport
-from core.models import City
-from core.models import Country
-from core.models import Crew
-from core.models import Flight
-from core.models import Order
-from core.models import Route
-from core.models import Ticket
+from core.models import (
+    Airplane,
+    AirplaneType,
+    Airport,
+    City,
+    Country,
+    Crew,
+    Flight,
+    Order,
+    Route,
+    Ticket,
+)
 
 
 class CountrySerializer(serializers.ModelSerializer):
