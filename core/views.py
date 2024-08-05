@@ -64,8 +64,11 @@ class AirplaneViewSet(viewsets.ModelViewSet):
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
     serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        queryset = Order.objects.all()
+        return queryset.filter(user=self.request.user)
 
 
 class CrewViewSet(viewsets.ModelViewSet):
@@ -81,6 +84,10 @@ class FlightViewSet(viewsets.ModelViewSet):
 
 
 class TicketViewSet(viewsets.ModelViewSet):
-    queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
     permission_classes = [IsAdminOrAuthenticatedReadOnly,]
+
+    def get_queryset(self):
+        queryset = Ticket.objects.all()
+        return queryset.filter(order__user=self.request.user)
+
