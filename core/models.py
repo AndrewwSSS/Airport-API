@@ -1,5 +1,8 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import UniqueConstraint
 
 
 class Country(models.Model):
@@ -16,6 +19,14 @@ class City(models.Model):
         on_delete=models.CASCADE,
         related_name="cities",
     )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "country"],
+                name="unique_city_for_country",
+            )
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.country})"
@@ -44,7 +55,19 @@ class Route(models.Model):
         on_delete=models.CASCADE,
         related_name="destination_routes",
     )
-    distance = models.IntegerField()
+    distance = models.IntegerField(
+        validators=[
+            MinValueValidator(10)
+        ]
+    )
+
+    def validate(self):
+        if self.source == self.destination:
+            raise ValidationError(
+                {
+                    "source": "Source and destination must be different"
+                }
+            )
 
     def __str__(self):
         return f"{self.source.name} - {self.destination.name}"
@@ -119,9 +142,13 @@ class Ticket(models.Model):
         related_name="tickets",
     )
 
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["order", "row", "seat"],
+                name="unique_tickets_for_order",
+            )
+        ]
+
     def __str__(self):
         return f"row: {self.row} / seat: {self.seat}"
-
-
-
-
