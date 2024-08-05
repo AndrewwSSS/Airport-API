@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
@@ -61,13 +62,21 @@ class Route(models.Model):
         ]
     )
 
-    def validate(self):
-        if self.source == self.destination:
-            raise ValidationError(
+    @staticmethod
+    def validate_source_and_destination(source, destination, exception) -> None:
+        if source == destination:
+            raise exception(
                 {
                     "source": "Source and destination must be different"
                 }
             )
+
+    def validate(self):
+        self.validate_source_and_destination(
+            self.source,
+            self.destination,
+            ValidationError
+        )
 
     def __str__(self):
         return f"{self.source.name} - {self.destination.name}"
@@ -82,8 +91,18 @@ class AirplaneType(models.Model):
 
 class Airplane(models.Model):
     name = models.CharField(max_length=100)
-    rows = models.IntegerField()
-    seats_in_row = models.IntegerField()
+    rows = models.IntegerField(
+        validators=[
+            MinValueValidator(3),
+            MaxValueValidator(5),
+        ]
+    )
+    seats_in_row = models.IntegerField(
+        validators=[
+            MinValueValidator(2),
+            MaxValueValidator(100),
+        ]
+    )
     airplane_type = models.ForeignKey(
         AirplaneType,
         on_delete=models.CASCADE,
