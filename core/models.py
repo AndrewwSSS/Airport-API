@@ -5,6 +5,9 @@ from django.db import models
 class Country(models.Model):
     name = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.name
+
 
 class City(models.Model):
     name = models.CharField(max_length=100)
@@ -14,6 +17,9 @@ class City(models.Model):
         related_name="cities",
     )
 
+    def __str__(self):
+        return f"{self.name} ({self.country})"
+
 
 class Airport(models.Model):
     name = models.CharField(max_length=100)
@@ -22,6 +28,9 @@ class Airport(models.Model):
         on_delete=models.CASCADE,
         related_name="airports",
     )
+
+    def __str__(self):
+        return self.name
 
 
 class Route(models.Model):
@@ -37,9 +46,15 @@ class Route(models.Model):
     )
     distance = models.IntegerField()
 
+    def __str__(self):
+        return f"{self.source.name} - {self.destination.name}"
+
 
 class AirplaneType(models.Model):
     name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
 
 
 class Airplane(models.Model):
@@ -52,10 +67,16 @@ class Airplane(models.Model):
         related_name="airplanes",
     )
 
+    def __str__(self):
+        return self.name
+
 
 class Crew(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
 
 
 class Order(models.Model):
@@ -65,6 +86,9 @@ class Order(models.Model):
         on_delete=models.CASCADE,
         related_name="orders",
     )
+
+    def __str__(self):
+        return f"{self.created_at} - {self.user}"
 
 
 class Flight(models.Model):
@@ -82,6 +106,9 @@ class Flight(models.Model):
     arrival_time = models.DateTimeField()
     crew = models.ManyToManyField(Crew)
 
+    def __str__(self):
+        return f"{self.route} / {self.departure_time} - {self.arrival_time}"
+
 
 class Ticket(models.Model):
     row = models.IntegerField()
@@ -91,6 +118,9 @@ class Ticket(models.Model):
         on_delete=models.CASCADE,
         related_name="tickets",
     )
+
+    def __str__(self):
+        return f"row: {self.row} / seat: {self.seat}"
 
 
 
