@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
+from django.utils import timezone
 
 
 class Country(models.Model):
@@ -147,6 +148,32 @@ class Flight(models.Model):
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
     crew = models.ManyToManyField(Crew)
+
+    @staticmethod
+    def validate_departure_time_and_arrival_time(
+            departure_time,
+            arrival_time,
+            exception
+    ):
+        if departure_time <= timezone.now():
+            raise exception(
+                {
+                    "departure_time": "departure_time must be less than now"
+                }
+            )
+        if departure_time >= arrival_time:
+            raise exception(
+                {
+                    "departure_time": "Departure time is greater than arrival time"
+                }
+            )
+
+    def validate(self):
+        self.validate_departure_time_and_arrival_time(
+            self.departure_time,
+            self.arrival_time,
+            ValidationError
+        )
 
     def __str__(self):
         return f"{self.route} / {self.departure_time} - {self.arrival_time}"
