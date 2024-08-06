@@ -34,6 +34,18 @@ class CitySerializer(serializers.ModelSerializer):
         ]
 
 
+class CityListSerializer(CitySerializer):
+    country = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field="name"
+    )
+
+
+class CityDetailSerializer(CitySerializer):
+    country = CountrySerializer()
+
+
 class AirportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airport
@@ -44,8 +56,19 @@ class AirportSerializer(serializers.ModelSerializer):
         ]
 
 
-class RouteSerializer(serializers.ModelSerializer):
+class AirportListSerializer(AirportSerializer):
+    closest_big_city = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field="name"
+    )
 
+
+class AirportDetailSerializer(AirportSerializer):
+    closest_big_city = CityDetailSerializer(many=False)
+
+
+class RouteSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         source = attrs.get("source")
         destination = attrs.get("destination")
@@ -68,6 +91,24 @@ class RouteSerializer(serializers.ModelSerializer):
         ]
 
 
+class RouteListSerializer(RouteSerializer):
+    source = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field="name"
+    )
+    destination = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field="name"
+    )
+
+
+class RouteDetailSerializer(RouteSerializer):
+    source = AirportDetailSerializer(many=False)
+    destination = AirportDetailSerializer(many=False)
+
+
 class AirplaneTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AirplaneType
@@ -84,33 +125,9 @@ class TicketSerializer(serializers.ModelSerializer):
             "id",
             "row",
             "seat",
-            "order"
+            "order",
+            "flight"
         ]
-
-
-class OrderSerializer(serializers.ModelSerializer):
-    tickets = TicketSerializer(many=True)
-    created_at = serializers.DateTimeField(read_only=True)
-
-    class Meta:
-        model = Order
-        fields = [
-            "id",
-            "tickets",
-            "created_at"
-        ]
-
-    def create(self, validated_data):
-        tickets = validated_data.pop("tickets")
-        order = Order.objects.create(
-            **validated_data,
-            user=self.context["request"].user
-        )
-        for ticket in tickets:
-            ticket = Ticket(**ticket)
-            ticket.order = order
-            ticket.save()
-        return order
 
 
 class AirplaneSerializer(serializers.ModelSerializer):
@@ -123,6 +140,18 @@ class AirplaneSerializer(serializers.ModelSerializer):
             "seats_in_row",
             "airplane_type",
         ]
+
+
+class AirplaneListSerializer(AirplaneSerializer):
+    airplane_type = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field="name"
+    )
+
+
+class AirplaneDetailSerializer(AirplaneSerializer):
+    airplane_type = AirplaneTypeSerializer(many=False)
 
 
 class FlightSerializer(serializers.ModelSerializer):
@@ -158,8 +187,20 @@ class FlightSerializer(serializers.ModelSerializer):
             "airplane",
             "departure_time",
             "arrival_time",
-            "crew"
         ]
+
+
+class FlightListSerializer(FlightSerializer):
+    airplane = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field="name"
+    )
+    route = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field="name"
+    )
 
 
 class CrewSerializer(serializers.ModelSerializer):
@@ -169,4 +210,83 @@ class CrewSerializer(serializers.ModelSerializer):
             "id",
             "first_name",
             "last_name",
+        ]
+
+
+class FlightDetailSerializer(FlightSerializer):
+    airplane = AirplaneDetailSerializer(many=False)
+    crew = CrewSerializer(many=True)
+    route = RouteDetailSerializer(many=False)
+
+    class Meta:
+        model = Flight
+        fields = FlightSerializer.Meta.fields + [
+            "crew"
+        ]
+
+
+class TicketCreateWithOrderSerializer(TicketSerializer):
+    flight = FlightSerializer(many=False)
+
+    class Meta:
+        model = Ticket
+        fields = [
+            "id",
+            "row",
+            "seat",
+            "flight"
+        ]
+
+
+class TicketDetailSerializer(TicketSerializer):
+    flight = FlightDetailSerializer(many=False)
+
+    class Meta:
+        model = Ticket
+        fields = [
+            "id",
+            "row",
+            "seat",
+            "flight"
+        ]
+
+
+class TicketListSerializer(TicketSerializer):
+    flight = FlightListSerializer(many=False)
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    tickets = TicketCreateWithOrderSerializer(many=True)
+    created_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            "id",
+            "tickets",
+            "created_at"
+        ]
+
+    def create(self, validated_data):
+        tickets = validated_data.pop("tickets")
+        order = Order.objects.create(
+            **validated_data,
+            user=self.context["request"].user
+        )
+        for ticket in tickets:
+            ticket = Ticket(**ticket)
+            ticket.order = order
+            ticket.save()
+        return order
+
+
+class OrderDetailSerializer(serializers.ModelSerializer):
+    tickets = TicketDetailSerializer(many=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            "id",
+            "tickets",
+            "created_at"
         ]

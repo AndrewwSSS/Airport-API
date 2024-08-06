@@ -21,10 +21,10 @@ router.register("airports", AirportViewSet)
 router.register("routes", RouteViewSet)
 router.register("airplane-types", AirplaneTypesViewSet)
 router.register("airplanes", AirplaneViewSet)
-router.register("orders", OrderViewSet)
+router.register("orders", OrderViewSet, basename="orders")
 router.register("crews", CrewViewSet)
 router.register("flights", FlightViewSet)
-router.register("tickets", TicketViewSet)
+router.register("tickets", TicketViewSet, basename="tickets")
 
 urlpatterns = [
     path("", include(router.urls)),
