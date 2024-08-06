@@ -143,8 +143,19 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     serializer_class = FlightSerializer
     permission_classes = [IsAdminOrAuthenticatedReadOnly,]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    ordering_fields = ["route", "airplane", "departure_time", "arrival_time"]
-    search_fields = ["airplane__name", "departure_time", "arrival_time"]
+    ordering_fields = [
+        "airplane",
+        "departure_time",
+        "arrival_time",
+        "route__source__name",
+        "route__destination__name",
+    ]
+    search_fields = [
+        "airplane__name",
+        "departure_time",
+        "arrival_time",
+        "route__name"
+    ]
     serializer_class_mapping = {
         "retrieve": FlightDetailSerializer,
         "list": FlightListSerializer,
@@ -155,7 +166,8 @@ class TicketViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     serializer_class = TicketSerializer
     permission_classes = [IsAdminOrAuthenticatedReadOnly,]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    ordering_fields = ["route"]
+    ordering_fields = ["flight__route__name"]
+    search_fields = ["flight__route__name"]
     serializer_class_mapping = {
         "retrieve": TicketDetailSerializer,
         "list": TicketListSerializer,
