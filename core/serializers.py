@@ -226,7 +226,15 @@ class FlightDetailSerializer(FlightSerializer):
 
 
 class TicketCreateWithOrderSerializer(TicketSerializer):
-    flight = FlightSerializer(many=False)
+    def validate(self, attrs):
+        data = super(TicketSerializer, self).validate(attrs=attrs)
+        Ticket.validate_ticket(
+            attrs["row"],
+            attrs["seat"],
+            attrs["flight"],
+            ValidationError
+        )
+        return data
 
     class Meta:
         model = Ticket

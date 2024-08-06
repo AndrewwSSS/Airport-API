@@ -208,11 +208,42 @@ class Ticket(models.Model):
         related_name="tickets",
     )
 
+
+    @staticmethod
+    def validate_ticket(
+            row: int,
+            seat: int,
+            flight: Flight,
+            error,
+    ) -> None:
+        if row > flight.airplane.rows:
+            raise error(
+                {
+                    "row": "Invalid row"
+                }
+            )
+        if seat > flight.airplane.seats_in_row:
+            raise error(
+                {
+                    "seat": "Invalid seat"
+                }
+            )
+        queryset = flight.tickets.filter(
+            seat=seat,
+            row=row
+        )
+        if queryset.exists():
+            raise error(
+                {
+                    "seat": "Ticket already exists"
+                }
+            )
+
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["order", "row", "seat"],
-                name="unique_tickets_for_order",
+                fields=["flight", "row", "seat"],
+                name="unique_tickets_for_flight",
             )
         ]
 
