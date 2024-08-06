@@ -70,6 +70,13 @@ class Route(models.Model):
                     "source": "Source and destination must be different"
                 }
             )
+        queryset = Route.objects.filter(source=source, destination=destination)
+        if queryset.exists():
+            raise exception(
+                {
+                    "__all__": "This rout already exists"
+                }
+            )
 
     def validate(self):
         self.validate_source_and_destination(
