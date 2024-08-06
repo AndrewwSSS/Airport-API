@@ -81,6 +81,10 @@ class Route(models.Model):
     def __str__(self):
         return f"{self.source.name} - {self.destination.name}"
 
+    @property
+    def name(self):
+        return str(self)
+
 
 class AirplaneType(models.Model):
     name = models.CharField(max_length=100)
@@ -120,6 +124,10 @@ class Crew(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
+    @property
+    def full_name(self) -> str:
+        return str(self)
+
 
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -140,7 +148,7 @@ class Flight(models.Model):
         related_name="flights",
     )
     airplane = models.ForeignKey(
-        AirplaneType,
+        Airplane,
         on_delete=models.CASCADE,
         related_name="flights",
     )
@@ -179,8 +187,21 @@ class Flight(models.Model):
 
 
 class Ticket(models.Model):
-    row = models.IntegerField()
-    seat = models.IntegerField()
+    row = models.IntegerField(
+        validators=[
+            MinValueValidator(1),
+        ]
+    )
+    seat = models.IntegerField(
+        validators=[
+            MinValueValidator(1),
+        ]
+    )
+    flight = models.ForeignKey(
+        Flight,
+        on_delete=models.CASCADE,
+        related_name="tickets",
+    )
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
