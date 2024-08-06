@@ -124,7 +124,9 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Order.objects.all()
-        return queryset.filter(user=self.request.user)
+        if not self.request.user.is_staff:
+            queryset.filter(user=self.request.user)
+        return queryset
 
 
 class CrewViewSet(viewsets.ModelViewSet):
@@ -161,4 +163,6 @@ class TicketViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Ticket.objects.all()
-        return queryset.filter(order__user=self.request.user)
+        if not self.request.user.is_staff:
+            queryset.filter(order__user=self.request.user)
+        return queryset
