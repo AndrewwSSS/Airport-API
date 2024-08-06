@@ -104,14 +104,14 @@ class Airplane(models.Model):
     name = models.CharField(max_length=100)
     rows = models.IntegerField(
         validators=[
-            MinValueValidator(3),
-            MaxValueValidator(5),
+            MinValueValidator(4),
+            MaxValueValidator(60),
         ]
     )
     seats_in_row = models.IntegerField(
         validators=[
-            MinValueValidator(2),
-            MaxValueValidator(100),
+            MinValueValidator(1),
+            MaxValueValidator(4),
         ]
     )
     airplane_type = models.ForeignKey(
