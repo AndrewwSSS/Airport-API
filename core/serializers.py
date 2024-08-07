@@ -168,8 +168,8 @@ class FlightSerializer(serializers.ModelSerializer):
         )
         flights = Flight.objects.filter(
             airplane=airplane,
-            departure_time__gte=departure_time,
-            arrival_time__lte=arrival_time
+            departure_time__lte=arrival_time,
+            arrival_time__gte=departure_time
         )
         if flights.exists():
             raise ValidationError(
