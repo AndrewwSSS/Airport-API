@@ -1,6 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 
+from rest_framework.permissions import IsAdminUser
 from core.models import (
     Airplane,
     AirplaneType,
@@ -53,7 +54,7 @@ class GenericMethodsMapping:
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
-    permission_classes = [IsAdminOrAuthenticatedReadOnly,]
+    permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ["name"]
     search_fields = ["name"]
@@ -62,7 +63,7 @@ class CountryViewSet(viewsets.ModelViewSet):
 class CityViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
-    permission_classes = [IsAdminOrAuthenticatedReadOnly,]
+    permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ["name"]
     search_fields = ["name"]
@@ -88,7 +89,7 @@ class AirportViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
 class RouteViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
-    permission_classes = [IsAdminOrAuthenticatedReadOnly,]
+    permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["source__name", "destination__name"]
     serializer_class_mapping = {
@@ -100,7 +101,7 @@ class RouteViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
 class AirplaneTypesViewSet(viewsets.ModelViewSet):
     queryset = AirplaneType.objects.all()
     serializer_class = AirplaneTypeSerializer
-    permission_classes = [IsAdminOrAuthenticatedReadOnly,]
+    permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ["name"]
     search_fields = ["name"]
@@ -109,7 +110,7 @@ class AirplaneTypesViewSet(viewsets.ModelViewSet):
 class AirplaneViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     queryset = Airplane.objects.all()
     serializer_class = AirplaneSerializer
-    permission_classes = [IsAdminOrAuthenticatedReadOnly,]
+    permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ["name"]
     search_fields = ["name"]
@@ -132,7 +133,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 class CrewViewSet(viewsets.ModelViewSet):
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
-    permission_classes = [IsAdminOrAuthenticatedReadOnly,]
+    permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ["first_name", "last_name"]
     search_fields = ["first_name", "last_name"]
@@ -144,7 +145,7 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     permission_classes = [IsAdminOrAuthenticatedReadOnly,]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = [
-        "airplane",
+        "airplane__name",
         "departure_time",
         "arrival_time",
         "route__source__name",
