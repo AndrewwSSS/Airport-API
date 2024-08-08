@@ -7,7 +7,10 @@ from django.utils import timezone
 
 
 class Country(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+    )
 
     def __str__(self):
         return self.name
@@ -56,33 +59,19 @@ class Route(models.Model):
         on_delete=models.CASCADE,
         related_name="destination_routes",
     )
-    distance = models.IntegerField(
-        validators=[
-            MinValueValidator(10)
-        ]
-    )
+    distance = models.IntegerField(validators=[MinValueValidator(10)])
 
     @staticmethod
     def validate_source_and_destination(source, destination, exception) -> None:
         if source == destination:
-            raise exception(
-                {
-                    "source": "Source and destination must be different"
-                }
-            )
+            raise exception({"source": "Source and destination must be different"})
         queryset = Route.objects.filter(source=source, destination=destination)
         if queryset.exists():
-            raise exception(
-                {
-                    "__all__": "This rout already exists"
-                }
-            )
+            raise exception({"__all__": "This rout already exists"})
 
     def validate(self):
         self.validate_source_and_destination(
-            self.source,
-            self.destination,
-            ValidationError
+            self.source, self.destination, ValidationError
         )
 
     def __str__(self):
@@ -165,28 +154,18 @@ class Flight(models.Model):
 
     @staticmethod
     def validate_departure_time_and_arrival_time(
-            departure_time,
-            arrival_time,
-            exception
+        departure_time, arrival_time, exception
     ):
         if departure_time <= timezone.now():
-            raise exception(
-                {
-                    "departure_time": "departure_time must be less than now"
-                }
-            )
+            raise exception({"departure_time": "departure_time must be less than now"})
         if departure_time >= arrival_time:
             raise exception(
-                {
-                    "departure_time": "Departure time is greater than arrival time"
-                }
+                {"departure_time": "Departure time is greater than arrival time"}
             )
 
     def validate(self):
         self.validate_departure_time_and_arrival_time(
-            self.departure_time,
-            self.arrival_time,
-            ValidationError
+            self.departure_time, self.arrival_time, ValidationError
         )
 
     def __str__(self):
@@ -215,42 +194,22 @@ class Ticket(models.Model):
         related_name="tickets",
     )
 
-
     @staticmethod
     def validate_ticket(
-            row: int,
-            seat: int,
-            flight: Flight,
-            error,
+        row: int,
+        seat: int,
+        flight: Flight,
+        error,
     ) -> None:
         if row > flight.airplane.rows:
-            raise error(
-                {
-                    "row": "Invalid row"
-                }
-            )
+            raise error({"row": "Invalid row"})
         if seat > flight.airplane.seats_in_row:
-            raise error(
-                {
-                    "seat": "Invalid seat"
-                }
-            )
-        queryset = flight.tickets.filter(
-            seat=seat,
-            row=row
-        )
+            raise error({"seat": "Invalid seat"})
+        queryset = flight.tickets.filter(seat=seat, row=row)
         if flight.departure_time > timezone.now():
-            raise error(
-                {
-                    "departure_time": "The airplane has already departed."
-                }
-            )
+            raise error({"departure_time": "The airplane has already departed."})
         if queryset.exists():
-            raise error(
-                {
-                    "seat": "Ticket already exists"
-                }
-            )
+            raise error({"seat": "Ticket already exists"})
 
     class Meta:
         constraints = [
