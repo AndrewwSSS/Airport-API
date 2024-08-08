@@ -19,6 +19,8 @@ services:
     image:
       postgres:16.0-alpine3.17
     restart: always
+    ports:
+      - $POSTGRES_PORT:$POSTGRES_PORT
     env_file:
       - .env
     volumes:
