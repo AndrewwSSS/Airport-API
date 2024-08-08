@@ -239,6 +239,12 @@ class Ticket(models.Model):
             seat=seat,
             row=row
         )
+        if flight.departure_time > timezone.now():
+            raise error(
+                {
+                    "departure_time": "The airplane has already departed."
+                }
+            )
         if queryset.exists():
             raise error(
                 {
