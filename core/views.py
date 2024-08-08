@@ -1,4 +1,6 @@
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 
@@ -47,10 +49,7 @@ from core.serializers import (
 class GenericMethodsMapping:
     def get_serializer_class(self):
         if hasattr(self, "serializer_class_mapping"):
-            return self.serializer_class_mapping.get(
-                self.action,
-                self.serializer_class
-            )
+            return self.serializer_class_mapping.get(self.action, self.serializer_class)
         return self.serializer_class
 
 
@@ -67,10 +66,7 @@ class CityViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
     permission_classes = [IsAdminUser]
-    filter_backends = [
-        filters.SearchFilter,
-        filters.OrderingFilter
-    ]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = [
         "name",
         "country__name",
@@ -85,7 +81,9 @@ class CityViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
 class AirportViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     queryset = Airport.objects.all()
     serializer_class = AirportSerializer
-    permission_classes = [IsAdminOrAuthenticatedReadOnly,]
+    permission_classes = [
+        IsAdminOrAuthenticatedReadOnly,
+    ]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ["closest_big_city__name", "name"]
     search_fields = ["closest_big_city__name", "name"]
@@ -103,7 +101,7 @@ class RouteViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     filterset_fields = ["source__name", "destination__name"]
     serializer_class_mapping = {
         "retrieve": RouteDetailSerializer,
-        "list": RouteListSerializer
+        "list": RouteListSerializer,
     }
 
 
@@ -125,7 +123,7 @@ class AirplaneViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     search_fields = ["name"]
     serializer_class_mapping = {
         "retrieve": AirplaneDetailSerializer,
-        "list": AirplaneListSerializer
+        "list": AirplaneListSerializer,
     }
 
 
@@ -150,11 +148,13 @@ class CrewViewSet(viewsets.ModelViewSet):
 
 class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     serializer_class = FlightSerializer
-    permission_classes = [IsAdminOrAuthenticatedReadOnly,]
+    permission_classes = [
+        IsAdminOrAuthenticatedReadOnly,
+    ]
     filter_backends = [
         filters.SearchFilter,
         filters.OrderingFilter,
-        DjangoFilterBackend
+        DjangoFilterBackend,
     ]
     filterset_class = FlightFilterset
     ordering_fields = [
@@ -180,10 +180,16 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
             queryset = queryset.filter(departure_time__gt=now)
         return queryset
 
+    @method_decorator(cache_page(60 * 5))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class TicketViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     serializer_class = TicketSerializer
-    permission_classes = [IsAdminOrAuthenticatedReadOnly,]
+    permission_classes = [
+        IsAdminOrAuthenticatedReadOnly,
+    ]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ["flight__route__name"]
     search_fields = ["flight__route__name"]
