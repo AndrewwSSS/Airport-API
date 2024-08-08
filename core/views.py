@@ -1,4 +1,3 @@
-import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 
@@ -67,8 +66,14 @@ class CityViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
     permission_classes = [IsAdminUser]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    ordering_fields = ["name"]
+    filter_backends = [
+        filters.SearchFilter,
+        filters.OrderingFilter
+    ]
+    ordering_fields = [
+        "name",
+        "country__name",
+    ]
     search_fields = ["name"]
     serializer_class_mapping = {
         "retrieve": CityDetailSerializer,
@@ -149,7 +154,7 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     filter_backends = [
         filters.SearchFilter,
         filters.OrderingFilter,
-        django_filters.rest_framework.DjangoFilterBackend
+        DjangoFilterBackend
     ]
     filterset_class = FlightFilterset
     ordering_fields = [
