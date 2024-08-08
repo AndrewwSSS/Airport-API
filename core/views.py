@@ -1,7 +1,10 @@
+import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 
 from rest_framework.permissions import IsAdminUser
+
+from core.filtersets import FlightFilterset
 from core.models import (
     Airplane,
     AirplaneType,
@@ -143,7 +146,12 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     queryset = Flight.objects.all()
     serializer_class = FlightSerializer
     permission_classes = [IsAdminOrAuthenticatedReadOnly,]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [
+        filters.SearchFilter,
+        filters.OrderingFilter,
+        django_filters.rest_framework.DjangoFilterBackend
+    ]
+    filterset_class = FlightFilterset
     ordering_fields = [
         "airplane__name",
         "departure_time",
@@ -153,9 +161,7 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     ]
     search_fields = [
         "airplane__name",
-        "departure_time",
-        "arrival_time",
-        "route__name"
+        "route__name",
     ]
     serializer_class_mapping = {
         "retrieve": FlightDetailSerializer,
