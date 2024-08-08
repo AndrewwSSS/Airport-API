@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 
@@ -148,7 +149,6 @@ class CrewViewSet(viewsets.ModelViewSet):
 
 
 class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
-    queryset = Flight.objects.all()
     serializer_class = FlightSerializer
     permission_classes = [IsAdminOrAuthenticatedReadOnly,]
     filter_backends = [
@@ -172,6 +172,13 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
         "retrieve": FlightDetailSerializer,
         "list": FlightListSerializer,
     }
+
+    def get_queryset(self):
+        queryset = Flight.objects.all()
+        if not self.request.user.is_staff:
+            now = timezone.now()
+            queryset = queryset.filter(departure_time__gt=now)
+        return queryset
 
 
 class TicketViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
