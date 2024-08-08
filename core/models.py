@@ -206,7 +206,7 @@ class Ticket(models.Model):
         if seat > flight.airplane.seats_in_row:
             raise error({"seat": "Invalid seat"})
         queryset = flight.tickets.filter(seat=seat, row=row)
-        if flight.departure_time > timezone.now():
+        if flight.departure_time < timezone.now():
             raise error({"departure_time": "The airplane has already departed."})
         if queryset.exists():
             raise error({"seat": "Ticket already exists"})
