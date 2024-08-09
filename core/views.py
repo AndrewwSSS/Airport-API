@@ -180,7 +180,7 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
             queryset = queryset.filter(departure_time__gt=now)
         return queryset
 
-    @method_decorator(cache_page(60 * 5))
+    @method_decorator(cache_page(60 * 5, key_prefix="flights"))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
