@@ -1,7 +1,7 @@
 FROM python:3.11.9-alpine3.19
 LABEL maintainer="clash2clans1one@gmail.com"
 
-ENV PYTHOUNNBUFFERED 1
+ENV PYTHONUNBUFFERED 1
 
 WORKDIR app/
 
