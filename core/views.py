@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import never_cache
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 
@@ -63,7 +64,7 @@ class CountryViewSet(viewsets.ModelViewSet):
 
 
 class CityViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
-    queryset = City.objects.all()
+    queryset = City.objects.select_related("country")
     serializer_class = CitySerializer
     permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -79,7 +80,7 @@ class CityViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
 
 
 class AirportViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
-    queryset = Airport.objects.all()
+    queryset = Airport.objects.select_related("closest_big_city")
     serializer_class = AirportSerializer
     permission_classes = [
         IsAdminOrAuthenticatedReadOnly,
@@ -94,7 +95,7 @@ class AirportViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
 
 
 class RouteViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
-    queryset = Route.objects.all()
+    queryset = Route.objects.select_related("source", "destination")
     serializer_class = RouteSerializer
     permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend]
@@ -115,7 +116,7 @@ class AirplaneTypesViewSet(viewsets.ModelViewSet):
 
 
 class AirplaneViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
-    queryset = Airplane.objects.all()
+    queryset = Airplane.objects.select_related("airplane_type")
     serializer_class = AirplaneSerializer
     permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -131,7 +132,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        queryset = Order.objects.all()
+        queryset = Order.objects.prefetch_related("tickets")
         if not self.request.user.is_staff:
             queryset.filter(user=self.request.user)
         return queryset
@@ -174,7 +175,9 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     }
 
     def get_queryset(self):
-        queryset = Flight.objects.all()
+        queryset = Flight.objects.select_related(
+            "airplane", "route__source", "route__destination"
+        )
         if not self.request.user.is_staff:
             now = timezone.now()
             queryset = queryset.filter(departure_time__gt=now)
@@ -199,7 +202,11 @@ class TicketViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     }
 
     def get_queryset(self):
-        queryset = Ticket.objects.all()
+        queryset = Ticket.objects.select_related(
+            "flight__route__destination",
+            "flight__route__source",
+            "flight__airplane",
+        )
         if not self.request.user.is_staff:
             queryset.filter(order__user=self.request.user)
         return queryset
