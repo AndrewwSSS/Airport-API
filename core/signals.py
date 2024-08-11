@@ -11,12 +11,10 @@ def invalidate_flights_cache() -> None:
 
 
 @receiver(post_save, sender=Flight)
-def cache_save_invalidate(sender, **kwargs):
+def flight_post_save_signal(sender, **kwargs):
     invalidate_flights_cache()
-    print("invalidate post save cache")
 
 
 @receiver(post_delete, sender=Flight)
-def cache_delete_invalidate(sender, **kwargs):
+def flight_post_delete_signal(sender, **kwargs):
     invalidate_flights_cache()
-    print("invalidate post delete cache")
