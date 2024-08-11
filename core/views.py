@@ -177,11 +177,15 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
     }
 
     def get_queryset(self):
-        queryset = Flight.objects.select_related(
-            "airplane", "route__source", "route__destination"
-        ).annotate(
-            tickets_available=F("airplane__rows") * F("airplane__seats_in_row")
-            - Count("tickets"),
+        queryset = (
+            Flight.objects.select_related(
+                "airplane", "route__source", "route__destination"
+            )
+            .prefetch_related("crew")
+            .annotate(
+                tickets_available=F("airplane__rows") * F("airplane__seats_in_row")
+                - Count("tickets"),
+            )
         )
         if not self.request.user.is_staff:
             now = timezone.now()
