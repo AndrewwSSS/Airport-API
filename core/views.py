@@ -3,7 +3,7 @@ from django.db.models import F
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.views.decorators.cache import never_cache
+from django.views.decorators.vary import vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 
@@ -36,7 +36,7 @@ from core.serializers import (
     CitySerializer,
     CountrySerializer,
     CrewSerializer,
-    FlightDetailSerializer,
+    FlightAdminDetailSerializer,
     FlightListSerializer,
     FlightSerializer,
     OrderSerializer,
@@ -47,6 +47,7 @@ from core.serializers import (
     TicketListSerializer,
     TicketSerializer,
 )
+from core.serializers import FlightUserDetailSerializer
 
 
 class GenericMethodsMapping:
@@ -149,7 +150,7 @@ class CrewViewSet(viewsets.ModelViewSet):
     search_fields = ["first_name", "last_name"]
 
 
-class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
+class FlightViewSet(viewsets.ModelViewSet):
     serializer_class = FlightSerializer
     permission_classes = [
         IsAdminOrAuthenticatedReadOnly,
@@ -171,10 +172,6 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
         "airplane__name",
         "route__name",
     ]
-    serializer_class_mapping = {
-        "retrieve": FlightDetailSerializer,
-        "list": FlightListSerializer,
-    }
 
     def get_queryset(self):
         queryset = (
@@ -192,6 +189,17 @@ class FlightViewSet(GenericMethodsMapping, viewsets.ModelViewSet):
             queryset = queryset.filter(departure_time__gt=now)
         return queryset
 
+    def get_serializer_class(self):
+        if self.action == "list":
+            return FlightListSerializer
+        elif self.action == "retrieve" and self.request.user.is_staff:
+            return FlightAdminDetailSerializer
+        elif self.action == "retrieve":
+            return FlightUserDetailSerializer
+        else:
+            return self.serializer_class
+
+    @vary_on_headers("Authorization")
     @method_decorator(cache_page(60 * 5, key_prefix="flights"))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
