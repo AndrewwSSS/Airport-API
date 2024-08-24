@@ -29,9 +29,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "core",
-    "user",
     "rest_framework",
+    "django_celery_beat",
+    "notification",
+    "user",
+    "core",
     "django_filters",
     "drf_spectacular",
     "debug_toolbar",
@@ -148,7 +150,6 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API to get information about airports, buy tickets etc.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    # OTHER SETTINGS
 }
 
 # set to debug
@@ -167,6 +168,24 @@ CACHES = {
         },
     }
 }
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_BEAT_SCHEDULE = {
+    "reminiscent_notifications": {
+        "task": "core.tasks.create_flight_notifications",
+        "schedule": timedelta(days=1),
+    },
+}
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_BROKER_URL")
+CELERY_TIMEZONE = "Europe/Kiev"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
 
 # set parameters to run project locally
 if os.getenv("DOCKER", False):
