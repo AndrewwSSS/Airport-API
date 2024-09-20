@@ -1,6 +1,7 @@
 from typing import Iterable
 
 import httpx
+from django.conf import settings
 from django.utils import timezone
 
 from core.models import Ticket
@@ -31,9 +32,10 @@ class NotificationService:
         tickets = Ticket.objects.filter(
             flight__departure_time__date=tomorrow,
         )
-        message_pattern = "You have flight tomorrow\n{0}\nDeparture time: {1}"
 
         self._send_notifications(
-            message_pattern.format(ticket.flight.route, ticket.flight.departure_time)
+            settings.REMINISCENT_NOTIFICATION_MESSAGE_PATTERN.format(
+                route=ticket.flight.route, departure_time=ticket.flight.departure_time
+            )
             for ticket in tickets
         )

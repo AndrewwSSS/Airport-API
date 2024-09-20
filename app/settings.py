@@ -189,6 +189,9 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 DEPARTURE_TIME_CHANGED_MESSAGE_PATTERN = (
     "{route} arrival time changed from {old_time} to {new_time}"
 )
+REMINISCENT_NOTIFICATION_MESSAGE_PATTERN = (
+    "You have flight tomorrow\n{route}" "\nDeparture time: {departure_time}"
+)
 
 
 # set parameters to run project locally
