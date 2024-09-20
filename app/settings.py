@@ -186,6 +186,10 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
+DEPARTURE_TIME_CHANGED_MESSAGE_PATTERN = (
+    "{route} arrival time changed from {old_time} to {new_time}"
+)
+
 
 # set parameters to run project locally
 if os.getenv("DOCKER", False):

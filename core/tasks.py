@@ -8,4 +8,4 @@ def create_flight_notifications():
     service = NotificationService(
         settings.TELEGRAM_BOT_TOKEN, settings.TELEGRAM_CHAT_ID
     )
-    service.send_reminiscent_messages()
+    service.send_reminiscent_notification()

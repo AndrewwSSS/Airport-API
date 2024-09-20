@@ -127,7 +127,8 @@ class FlightSerializer(serializers.ModelSerializer):
             airplane=airplane,
             departure_time__lte=arrival_time,
             arrival_time__gte=departure_time,
-        )
+        ).exclude(id=self.instance.pk)
+
         if flights.exists():
             raise ValidationError(
                 {"airplane": "This airplane has flight in this time."}
